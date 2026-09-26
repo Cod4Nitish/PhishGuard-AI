@@ -1,73 +1,99 @@
-# React + TypeScript + Vite
+# PhishGuard-AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Live demo](https://img.shields.io/badge/Live_demo-Open_PhishGuard-0ea5e9?style=for-the-badge)](https://cod4nitish.github.io/PhishGuard-AI/)
 
-Currently, two official plugins are available:
+An interactive **phishing-awareness and URL-security UX prototype**. PhishGuard-AI demonstrates how a modern security dashboard can guide a user through an apparent URL scan, visualise a threat landscape, and explain common malware risks.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Live demo:** [cod4nitish.github.io/PhishGuard-AI](https://cod4nitish.github.io/PhishGuard-AI/)
 
-## React Compiler
+> [!IMPORTANT]
+> This repository is a frontend prototype, not a live malware-detection service. The scanner returns fixed simulated result data, the map creates animated random markers, and the monitoring/history views are presentation states. Do not rely on it to assess a URL's safety.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## What it demonstrates
 
-## Expanding the ESLint configuration
+- A focused scan flow with loading, risk score, indicators, and result states.
+- A multi-page experience using hash-based routes: Scanner, Monitoring, and Scan History.
+- An animated global threat-map visual built with `react-simple-maps`.
+- Malware-awareness content, responsive layout, and motion-led feedback.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Architecture and data boundaries
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```mermaid
+flowchart LR
+    U[User] --> R[React app + HashRouter]
+    R --> H[Scanner page]
+    R --> M[Monitoring and History views]
+    H --> S[Local state + simulated scan result]
+    M --> T[Presentation-only monitoring/history data]
+    R --> G[Global threat map]
+    G --> W[World Atlas topology CDN]
+    G --> X[Randomly generated animated markers]
+    H -. optional visual preview .-> P[External thum.io screenshot service]
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The URL preview feature passes the submitted URL to an external screenshot service (`thum.io`) so it can render a preview. Treat that as a third-party data-sharing boundary; do not submit sensitive or private URLs.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Tech stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Area | Technology |
+| --- | --- |
+| UI | React 19, TypeScript, Vite |
+| Navigation | React Router with `HashRouter` |
+| Styling | Tailwind CSS, custom CSS |
+| Visualisation | `react-simple-maps`, World Atlas topology |
+| Motion and icons | Framer Motion, Lucide React |
+| Deployment | GitHub Pages |
+
+## Project structure
+
+```text
+src/
+  components/       # Sidebar, map, awareness content, footer
+  layouts/          # Shared application shell
+  pages/            # Scanner, Monitoring, and History routes
+  App.tsx           # HashRouter route map
+  main.tsx          # React entry point
 ```
+
+## Run locally
+
+Prerequisite: Node.js 20 or newer.
+
+```bash
+git clone https://github.com/Cod4Nitish/PhishGuard-AI.git
+cd PhishGuard-AI
+npm ci --legacy-peer-deps
+npm run dev
+```
+
+`react-simple-maps` currently declares an older React peer range than the React 19 app uses. `--legacy-peer-deps` is required to reproduce the existing lockfile until the visualisation dependency is upgraded or replaced.
+
+Run the quality and production checks with:
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+## Use the demo
+
+1. Open the Scanner route and enter a non-sensitive example URL.
+2. Select **Analyze URL** to view the simulated risk result.
+3. Visit Monitoring for the animated visualisation and History for the static scan-history interface.
+
+## Scope and next steps
+
+To become a real security product, PhishGuard would need a secure backend, an authenticated threat-intelligence provider, server-side URL analysis, persisted audit history, rate limits, privacy controls, and clear handling for false positives/negatives. Those capabilities are intentionally outside the current prototype.
+
+## Deploy
+
+```bash
+npm run deploy
+```
+
+The command builds the static site and publishes `dist/` to the `gh-pages` branch.
+
+## License
+
+No license has been selected for this repository yet. Add one before accepting external contributions or reuse.

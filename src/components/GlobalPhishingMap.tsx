@@ -9,9 +9,17 @@ import { motion } from 'framer-motion';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
+type ThreatMarker = {
+    id: number;
+    coordinates: [number, number];
+    timestamp: number;
+    pulseDuration: number;
+    pulseDelay: number;
+};
+
 // Helper to generate random coordinates (rough landmass approximation)
 const generateMarkers = (count: number) => {
-    const points: Array<{ id: number; coordinates: [number, number]; timestamp: number }> = [];
+    const points: ThreatMarker[] = [];
     for (let i = 0; i < count; i++) {
         // Avoid poles, mostly focus between -60 and +60 latitude
         const lat = (Math.random() * 120) - 60;
@@ -19,14 +27,16 @@ const generateMarkers = (count: number) => {
         points.push({
             id: i,
             coordinates: [lng, lat],
-            timestamp: Date.now() + i * 1000
+            timestamp: Date.now() + i * 1000,
+            pulseDuration: 2 + Math.random(),
+            pulseDelay: Math.random(),
         });
     }
     return points;
 };
 
 const GlobalPhishingMap: React.FC = () => {
-    const [markers, setMarkers] = useState(generateMarkers(15));
+    const [markers, setMarkers] = useState<ThreatMarker[]>(() => generateMarkers(15));
 
     // Periodically refresh some markers to simulate active attacks
     useEffect(() => {
@@ -85,7 +95,7 @@ const GlobalPhishingMap: React.FC = () => {
                         }
                     </Geographies>
 
-                    {markers.map(({ id, coordinates }) => (
+                    {markers.map(({ id, coordinates, pulseDuration, pulseDelay }) => (
                         <Marker key={id} coordinates={coordinates}>
                             <motion.circle
                                 r={4}
@@ -93,7 +103,7 @@ const GlobalPhishingMap: React.FC = () => {
                                 initial={{ opacity: 0, scale: 0 }}
                                 animate={{ opacity: [0, 1, 0.5, 1, 0.2], scale: [0, 1.5, 1, 1.2, 0.8] }}
                                 transition={{
-                                    duration: 2 + Math.random(),
+                                    duration: pulseDuration,
                                     repeat: Infinity,
                                     repeatType: "reverse"
                                 }}
@@ -108,7 +118,7 @@ const GlobalPhishingMap: React.FC = () => {
                                 strokeWidth={1}
                                 initial={{ opacity: 1, scale: 0 }}
                                 animate={{ opacity: 0, scale: 2 }}
-                                transition={{ duration: 1.5, repeat: Infinity, delay: Math.random() }}
+                                transition={{ duration: 1.5, repeat: Infinity, delay: pulseDelay }}
                             />
                         </Marker>
                     ))}
